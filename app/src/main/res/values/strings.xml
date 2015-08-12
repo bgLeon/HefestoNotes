@@ -8,4 +8,8 @@
     <string name="titulo">Titulo</string>
     <string name="contenido">Contenido</string>
     <string name="rellena_nota">Escribe aqui tu nota</string>
+    <string name="categoria">Categoria</string>
+    <string name="categoria_intro">Introduce una categoria para tu nota</string>
+    <string name="title_activity_list">ListActivity</string>
+    <string name="ListaVacia">Aun no ha guardado ninguna nota</string>
 </resources>
