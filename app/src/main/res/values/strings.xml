@@ -12,4 +12,11 @@
     <string name="categoria_intro">Introduce una categoria para tu nota</string>
     <string name="title_activity_list">ListActivity</string>
     <string name="ListaVacia">Aun no ha guardado ninguna nota</string>
+    <string name="a_adir">Añadir</string>
+    <string name="borrar_lista">Borrar todas las notas</string>
+    <string name="dialogo_borrar_lista">¿Está seguro de que quiere borrar todos los datos?</string>
+    <string name="msg_info">Lista de Notas, aquí puede ver todas las notas que tiene guardadas </string>
+    <string name="info">Información</string>
+    <string name="error_detalle">Problema al editar o crear el producto</string>
+
 </resources>

@@ -2,6 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.hefesto.bg.hefestonotes.ListActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <item
+        android:id="@+id/Annadir"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="@string/a_adir"
+        android:visible="true"
+        android:enabled="true">
+    </item>
+    <item
+        android:id="@+id/BorrarLista"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/borrar_lista">
+    </item>
+    <item
+        android:id="@+id/info"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="@string/info">
+    </item>
 </menu>
