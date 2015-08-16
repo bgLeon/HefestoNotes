@@ -17,6 +17,11 @@
     <string name="dialogo_borrar_lista">¿Está seguro de que quiere borrar todos los datos?</string>
     <string name="msg_info">Lista de Notas, aquí puede ver todas las notas que tiene guardadas </string>
     <string name="info">Información</string>
+    <string name="nota_guardada">Su nota se ha guardado</string>
+    <string name="inc_key">Clave incorrecta</string>
+    <string name="intr_key">Introduce la clave</string>
+    <string name="Descifrar">Descifrar</string>
+    <string name="cifrar">Cifrar</string>
     <string name="error_detalle">Problema al editar o crear el producto</string>
 
 </resources>

@@ -65,6 +65,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 notasCursor, from, to);
         lista = (ListView) findViewById(R.id.miLista);
         lista.setAdapter(cursorAdapter);
+        lista.setOnItemClickListener(this);
     }
 
     private void actualizaLista() {
@@ -152,6 +153,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
     @Override
     public void onItemClick(AdapterView<?> cursorAdapter, View view, int position,
                             long id) {
+        Log.d(TAG, "onItemClick");
         Cursor c = notasCursor;
         c.moveToPosition(position);
         Nota nota = new Nota(c.getString(indiceTitulo),
@@ -236,5 +238,6 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         }
 
     }
+
 }
 
