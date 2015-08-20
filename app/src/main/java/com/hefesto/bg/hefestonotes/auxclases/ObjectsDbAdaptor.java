@@ -44,9 +44,9 @@ public class ObjectsDbAdaptor {
             + ");";
     private static final String DATABASE_CREATE_PASS = "create table if not exists  " + DATABASE_TABLE_PASS
             + " (_id integer primary key autoincrement, "
-            + COL_CONTRASEÑA + " text not null,"
-            + COL_PREGUNTA + "text not null,"
-            + COL_RESPUESTA + "text not null"
+            + COL_CONTRASEÑA + " text not null, "
+            + COL_PREGUNTA + " text not null, "
+            + COL_RESPUESTA + " text not null"
             + ");";
 
     private static final int DATABASE_VERSION = 1;

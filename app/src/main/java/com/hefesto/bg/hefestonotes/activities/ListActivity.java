@@ -256,6 +256,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
             case CREA_SEGU: {
                 Seguridad seguridad = (Seguridad) extras.getSerializable(Seguridad.SEGURIDAD);
                 objectsDbAdaptor.creaSeguridad(seguridad);
+                clave=seguridad.getContraseña();
                 break;
             }
             default: {
@@ -267,27 +268,13 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
     private void checkClave() {
         if (clave.equals(ObjectsDbAdaptor.NULLPASS)) {
-            AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
-            dialogo.setMessage(R.string.empty_key);
-            dialogo.setPositiveButton(android.R.string.ok,
-                    new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            creaClaves();
-                        }
-
-                    });
-            AlertDialog confirma = dialogo.create();
-            confirma.show();
+            Intent miIntent = new Intent(this, LoginActivity.class);
+            Bundle extras = new Bundle();
+            extras.putInt(REQUEST_CODE, CREA_SEGU);
+            miIntent.putExtras(extras);
+            startActivityForResult(miIntent, CREA_SEGU);
         }
 
     }
-    private void creaClaves() {
-        Intent miIntent = new Intent(this, LoginActivity.class);
-        Bundle extras = new Bundle();
-        extras.putInt(REQUEST_CODE, CREA_SEGU);
-        miIntent.putExtras(extras);
-        startActivityForResult(miIntent, CREA_NOTA);
-    }
+
 }

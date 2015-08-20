@@ -1,6 +1,8 @@
 package com.hefesto.bg.hefestonotes.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         editRespuesta = (EditText) findViewById(R.id.editRespuesta);
         buttonGuardar = (Button) findViewById(R.id.buttonSaveSeg);
         buttonGuardar.setOnClickListener(new MiButtonGuardarOnClickListener());
-
+        mensajeExplicativo();
     }
 
     @Override
@@ -88,7 +90,8 @@ public class LoginActivity extends AppCompatActivity {
             String pregunta = editPregunta.getText().toString();
             String respuesta = editRespuesta.getText().toString();
 
-            if (password != null && pregunta != null && respuesta != null) {
+            if (!password.isEmpty() && !pregunta.isEmpty() && !respuesta.isEmpty()) {
+                Log.w(TAG,"Password: " + password);
                 Intent miIntent = new Intent();
                 Bundle extras = new Bundle();
                 Seguridad parametros = new Seguridad(password, pregunta, respuesta);
@@ -109,5 +112,20 @@ public class LoginActivity extends AppCompatActivity {
 
     private void decirGuardado() {
         Toast.makeText(this, R.string.nota_guardada, Toast.LENGTH_LONG).show();
+    }
+    private void mensajeExplicativo(){
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+        dialogo.setMessage(R.string.empty_key);
+        /*dialogo.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        creaClaves();
+                    }
+
+                });*/
+        AlertDialog confirma = dialogo.create();
+        confirma.show();
     }
 }

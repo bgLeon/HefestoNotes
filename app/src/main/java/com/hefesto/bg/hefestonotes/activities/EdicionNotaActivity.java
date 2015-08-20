@@ -88,7 +88,6 @@ public class EdicionNotaActivity extends AppCompatActivity {
             if (contenido != null) {
                 editContenido.setText(contenido);
             }
-            ;
             if (categoria != null) {
                 editCategoria.setText(categoria);
             }
@@ -129,7 +128,6 @@ public class EdicionNotaActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int id) {
-                                return;
                             }
                         });
 
@@ -226,10 +224,14 @@ public class EdicionNotaActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.d(TAG, "onClick SaveButton");
+            String titulo = editTitulo.getText().toString();
+            if (titulo.isEmpty()) {
+                decirRellenar();
+                return;
+            }
             Intent miIntent = new Intent();
             Bundle extras = new Bundle();
             extras.putLong(ObjectsDbAdaptor.COL_ID, id);
-            String titulo = editTitulo.getText().toString();
             String contenido = editContenido.getText().toString();
             String categoria = editCategoria.getText().toString();
             Nota nt = new Nota(titulo, contenido, categoria, isCifrado);
@@ -241,7 +243,9 @@ public class EdicionNotaActivity extends AppCompatActivity {
             finish();
         }
     }
-
+    private void decirRellenar(){
+        Toast.makeText(this, R.string.titulo_vacio, Toast.LENGTH_LONG).show();
+    }
     private void decirGuardado() {
         Toast.makeText(this, R.string.nota_guardada, Toast.LENGTH_LONG).show();
     }
@@ -300,6 +304,7 @@ public class EdicionNotaActivity extends AppCompatActivity {
 
                         } else {
                             decirIncorrecta();
+                            Log.w(TAG,"contraseña correcta es: " + clave);
                         }
 
                     }

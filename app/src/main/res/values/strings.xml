@@ -23,7 +23,7 @@
     <string name="Descifrar">Descifrar</string>
     <string name="cifrar">Cifrar</string>
     <string name="error_detalle">Problema al editar o crear el producto</string>
-    <string name="empty_key">Aun no ha registrado ninguna contraseña para cifrar sus notas, introduzca la clave a continuación:</string>
+    <string name="empty_key">Aun no ha registrado los parametros de seguridad para cifrar sus notas, introduzcalos continuación:</string>
     <string name="decirCifrado">Su nota se ha cifrado</string>
     <string name="decirDescifrado">Su nota se ha descifrado</string>
     <string name="confirm_exit">¿Salir sin guardar?</string>
@@ -35,5 +35,7 @@
     <string name="respuesta">Respuesta</string>
     <string name="formula_respuesta">Escribe aquí la respuesta a la pregunta anterior</string>
     <string name="rellenar_todo">Debe rellenar todos los campos</string>
+    <string name="Seg_Guardada">Todos los campos se han guardado</string>
+    <string name="titulo_vacio">La nota debe tener un título</string>
 
 </resources>
