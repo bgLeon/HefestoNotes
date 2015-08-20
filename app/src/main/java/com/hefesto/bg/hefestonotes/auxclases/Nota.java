@@ -1,4 +1,4 @@
-package com.hefesto.bg.hefestonotes;
+package com.hefesto.bg.hefestonotes.auxclases;
 
 import java.io.Serializable;
 

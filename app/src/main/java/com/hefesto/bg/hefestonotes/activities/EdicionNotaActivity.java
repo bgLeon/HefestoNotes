@@ -1,4 +1,4 @@
-package com.hefesto.bg.hefestonotes;
+package com.hefesto.bg.hefestonotes.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.app.ProgressDialog;
@@ -6,18 +6,21 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+
+import com.hefesto.bg.hefestonotes.auxclases.Cifrador;
+import com.hefesto.bg.hefestonotes.auxclases.Nota;
+import com.hefesto.bg.hefestonotes.auxclases.ObjectsDbAdaptor;
+import com.hefesto.bg.hefestonotes.R;
 
 public class EdicionNotaActivity extends AppCompatActivity {
     private static final String TAG = EdicionNotaActivity.class.getSimpleName();
@@ -29,10 +32,11 @@ public class EdicionNotaActivity extends AppCompatActivity {
     private Button buttonGuardar;
     private Button buttonCancelar;
     private ImageButton buttonCifrar;
-    private NotaDbAdaptor notaDbAdaptor;
+    private ObjectsDbAdaptor objectsDbAdaptor;
     private long id;
-    private final String clave = "teleco";
+    private String clave;
     private boolean isCifrado;
+    private boolean isSave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +44,11 @@ public class EdicionNotaActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_edicion_nota);
         editCategoria = (AutoCompleteTextView) findViewById(R.id.editCategoria);
-        notaDbAdaptor = new NotaDbAdaptor(this);
+        isSave = false;
+        objectsDbAdaptor = new ObjectsDbAdaptor(this);
         adaptadorAutocomplete = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
-                eliminaRepetidos(notaDbAdaptor.recuperaCategorias()));
+                eliminaRepetidos(objectsDbAdaptor.recuperaCategorias()));
         editCategoria.setAdapter(adaptadorAutocomplete);
         editTitulo = (EditText) findViewById(R.id.editTitulo);
         editContenido = (EditText) findViewById(R.id.editContenido);
@@ -62,21 +67,24 @@ public class EdicionNotaActivity extends AppCompatActivity {
             Log.e(TAG, "Error sin extras ");
             finish();
         }
+        Bundle bundle = getIntent().getExtras();
+        this.clave = bundle.getString("key");
         isCifrado = false;
         int requestCode = extras.getInt(ListActivity.REQUEST_CODE);
         if (requestCode == ListActivity.MODIFICA_NOTA) {
             Nota nota = (Nota) extras.getSerializable(Nota.NOTA);
-            id = extras.getLong(NotaDbAdaptor.COL_ID);
+            id = extras.getLong(ObjectsDbAdaptor.COL_ID);
             String titulo = nota.getTitulo();
             String contenido = nota.getContenido();
             String categoria = nota.getCategoria();
             isCifrado = nota.isCifrado();
             if (isCifrado) editContenido.setEnabled(false);
             cambiaInterfaz();
+
             if (titulo != null) {
                 editTitulo.setText(titulo);
             }
-            ;
+
             if (contenido != null) {
                 editContenido.setText(contenido);
             }
@@ -84,7 +92,6 @@ public class EdicionNotaActivity extends AppCompatActivity {
             if (categoria != null) {
                 editCategoria.setText(categoria);
             }
-            ;
             Log.d(TAG, "Edito " + nota);
         }
     }
@@ -95,6 +102,39 @@ public class EdicionNotaActivity extends AppCompatActivity {
         Log.d(TAG, "onStart");
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            confirmarSalida();
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void confirmarSalida(){
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        alertDialog
+                .setMessage(R.string.confirm_exit)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                finish();
+                            }
+                        })
+                .setNegativeButton("Cancelar",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                return;
+                            }
+                        });
+
+        alertDialog.show();
+    }
     @Override
     public void onResume() {
         super.onResume();
@@ -188,16 +228,17 @@ public class EdicionNotaActivity extends AppCompatActivity {
             Log.d(TAG, "onClick SaveButton");
             Intent miIntent = new Intent();
             Bundle extras = new Bundle();
-            extras.putLong(NotaDbAdaptor.COL_ID, id);
+            extras.putLong(ObjectsDbAdaptor.COL_ID, id);
             String titulo = editTitulo.getText().toString();
             String contenido = editContenido.getText().toString();
             String categoria = editCategoria.getText().toString();
             Nota nt = new Nota(titulo, contenido, categoria, isCifrado);
             extras.putSerializable(Nota.NOTA, nt);
-            ;
             miIntent.putExtras(extras);
             setResult(RESULT_OK, miIntent);
             decirGuardado();
+            isSave = true;
+            finish();
         }
     }
 
@@ -210,7 +251,7 @@ public class EdicionNotaActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.d(TAG, "onClick CancelButton");
-            finish();
+            confirmarSalida();
         }
     }
 
@@ -223,8 +264,16 @@ public class EdicionNotaActivity extends AppCompatActivity {
         }
     }
 
-    public void decirIncorrecta() {
+    private void decirIncorrecta() {
         Toast.makeText(this, R.string.inc_key, Toast.LENGTH_LONG).show();
+    }
+
+    private void decirCifrado() {
+        Toast.makeText(this, R.string.decirCifrado, Toast.LENGTH_LONG).show();
+    }
+
+    private void decirDesCifrado() {
+        Toast.makeText(this, R.string.decirDescifrado, Toast.LENGTH_LONG).show();
     }
 
     private void cifra() {
@@ -279,7 +328,7 @@ public class EdicionNotaActivity extends AppCompatActivity {
             Log.d(TAG, "acaba OnPre");
         }
 
-        // se crea una hebra automï¿½ticamente (diferente de la UI Thread)
+        // se crea una hebra automaticamente
         @Override
         protected String[] doInBackground(final String... params) {
             Log.d(TAG, "empieza Doin");
@@ -295,22 +344,22 @@ public class EdicionNotaActivity extends AppCompatActivity {
                 for (int i = 0; i < params[1].length(); i++) {
                     char c2 = cifrador.cifraCaracter(params[1].charAt(i));
                     buffer.append(c2);
-                    try {
+                   /* try {
                         for (Long j = 0L; j < 3L; j++) {
-                            Thread.sleep(20);
+                            Thread.sleep(1);
 
                         }
-                        ;
+
                     } catch (InterruptedException e) {
                         Log.v("Codificacion int", e.getMessage());
                     }
-                    publishProgress(++n, 0);
+                    publishProgress(++n, 0);*/
                 }
 
                 isCifrado = true;
-                String[] txt= new String [2];
-                txt[0]=buffer.toString();
-                txt[1]="1";
+                String[] txt = new String[2];
+                txt[0] = buffer.toString();
+                txt[1] = "1";
                 return txt;
             }
             Log.d(TAG, "Continua Doin descifrando");
@@ -321,24 +370,24 @@ public class EdicionNotaActivity extends AppCompatActivity {
                 char c1 = params[1].charAt(i);
                 char c2 = cifrador.descifraCaracter(c1);
                 buffer.append(c2);
-                try {
+               /* try {
                     for (Long j = 0L; j < 3L; j++) {
-                        Thread.sleep(20);
+                        Thread.sleep(1);
 
                     }
-                    ;
                 } catch (InterruptedException e) {
                     Log.v("Codificacion int", e.getMessage());
-                }
+                }*/
                 publishProgress(++n, 1);
             }
             isCifrado = false;
 
-            String[] txt= new String [2];
-            txt[0]=buffer.toString();
-            txt[1]="0";
+            String[] txt = new String[2];
+            txt[0] = buffer.toString();
+            txt[1] = "0";
             return txt;
         }
+
         protected void onProgressUpdate(Integer... value) {
             super.onProgressUpdate(value);
             if (value[1] == 0) {
@@ -356,11 +405,19 @@ public class EdicionNotaActivity extends AppCompatActivity {
                 barra.dismiss();
 
             }
+            if (isCifrado) decirCifrado();
+            else {
+                decirDesCifrado();
+            }
 
         }
     }
+
+    /**
+     * cambia la imagen del ImageButton
+     */
     public void cambiaInterfaz() {
-        ImageView candado = (ImageView) findViewById(R.id.lockButton);
+        ImageButton candado = (ImageButton) findViewById(R.id.lockButton);
         if (isCifrado) {
             Log.i(TAG, "Candado cerrado");
             candado.setImageResource(R.drawable.ic_menu_cifrar);
@@ -370,28 +427,11 @@ public class EdicionNotaActivity extends AppCompatActivity {
         }
 
     }
+
+    public String getClave() {
+        if (clave == null) return "Nullkey";
+        return clave;
+    }
 }
-    /**
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_edicion_nota, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-    */
 

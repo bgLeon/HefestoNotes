@@ -23,5 +23,9 @@
     <string name="Descifrar">Descifrar</string>
     <string name="cifrar">Cifrar</string>
     <string name="error_detalle">Problema al editar o crear el producto</string>
+    <string name="empty_key">Aun no ha registrado ninguna contraseña para cifrar sus notas, introduzca la clave a continuación:</string>
+    <string name="decirCifrado">Su nota se ha cifrado</string>
+    <string name="decirDescifrado">Su nota se ha descifrado</string>
+    <string name="confirm_exit">¿Salir sin guardar?</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package com.hefesto.bg.hefestonotes;
+package com.hefesto.bg.hefestonotes.activities;
 
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -9,14 +9,19 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View.OnClickListener;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.hefesto.bg.hefestonotes.auxclases.Nota;
+import com.hefesto.bg.hefestonotes.auxclases.ObjectsDbAdaptor;
+import com.hefesto.bg.hefestonotes.R;
+import com.hefesto.bg.hefestonotes.auxclases.Password;
 
 
 public class ListActivity extends AppCompatActivity implements OnItemClickListener {
@@ -27,7 +32,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
 
     ListView lista;
-    private NotaDbAdaptor notaDbAdaptor;
+    private ObjectsDbAdaptor objectsDbAdaptor;
     private Cursor notasCursor;
     private SimpleCursorAdapter cursorAdapter;
 
@@ -35,6 +40,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
     private int indiceTitulo;
     private int indiceCategoria;
     private int indiceCifrado;
+    private String clave;
 
 
     @Override
@@ -42,30 +48,35 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-        notaDbAdaptor = new NotaDbAdaptor(this);
-        notasCursor = notaDbAdaptor.recuperaTodasLasNotas();
-
-
+        objectsDbAdaptor = new ObjectsDbAdaptor(this);
+        notasCursor = objectsDbAdaptor.recuperaTodasLasNotas();
+        clave=objectsDbAdaptor.recuperaPassword();
         indiceTitulo = notasCursor
-                .getColumnIndexOrThrow(NotaDbAdaptor.COL_TITULO);
-
+                .getColumnIndexOrThrow(ObjectsDbAdaptor.COL_TITULO);
         indiceContenido = notasCursor
-                .getColumnIndexOrThrow(NotaDbAdaptor.COL_CONTENIDO);
+                .getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CONTENIDO);
         indiceCategoria = notasCursor
-                .getColumnIndexOrThrow(NotaDbAdaptor.COL_CATEGORIA);
+                .getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CATEGORIA);
         indiceCifrado = notasCursor
-                .getColumnIndexOrThrow(NotaDbAdaptor.COL_CIFRADO);
+                .getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CIFRADO);
 
-        String[] from = new String[]{NotaDbAdaptor.COL_TITULO,
-                NotaDbAdaptor.COL_CATEGORIA,};
+
+        String[] from = new String[]{ObjectsDbAdaptor.COL_TITULO,
+                ObjectsDbAdaptor.COL_CATEGORIA,};
         int[] to = new int[]{android.R.id.text1, android.R.id.text2};
         cursorAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_2, // PodrÃ­a usarse
                 // android.R.layout.simple_list_item_2
                 notasCursor, from, to);
+
         lista = (ListView) findViewById(R.id.miLista);
         lista.setAdapter(cursorAdapter);
         lista.setOnItemClickListener(this);
+        TextView emptyText = (TextView) findViewById(android.R.id.empty);
+        lista.setEmptyView(emptyText);
+
+        if (clave.equals(ObjectsDbAdaptor.NULLPASS))checkClave();
+
     }
 
     private void actualizaLista() {
@@ -93,7 +104,10 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
             }
             case R.id.Annadir: {
                 Intent miIntent = new Intent(this, EdicionNotaActivity.class);
-                miIntent.putExtra(REQUEST_CODE, CREA_NOTA);
+                Bundle extras = new Bundle();
+                extras.putInt(REQUEST_CODE, CREA_NOTA);
+                extras.putString("key", clave);
+                miIntent.putExtras(extras);
                 startActivityForResult(miIntent, CREA_NOTA);
                 return true;
             }
@@ -109,8 +123,6 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 return false;
             }
         }
-
-        //return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -140,8 +152,8 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
     /**
      * Te devuelve el equivalente en boolean de si esta cifrado o no.
      *
-     * @param cifrado
-     * @return
+     * @param cifrado estado del cifrado
+     * @return si esta cifrado
      */
 
     private boolean conversorCifrado(int cifrado) {
@@ -162,12 +174,14 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
         Intent intent = new Intent(this, EdicionNotaActivity.class);
         Bundle extras = new Bundle();
-        extras.putLong(NotaDbAdaptor.COL_ID, id);
+        extras.putLong(ObjectsDbAdaptor.COL_ID, id);
         extras.putSerializable(Nota.NOTA, nota);
         extras.putInt(REQUEST_CODE, MODIFICA_NOTA);
+        extras.putString("key",clave);
         intent.putExtras(extras);
         startActivityForResult(intent, MODIFICA_NOTA);
     }
+
     private void borrarLista() {
         AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
         dialogo.setMessage(R.string.dialogo_borrar_lista);
@@ -176,7 +190,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        notaDbAdaptor.borraTodasLasNotas();
+                        objectsDbAdaptor.borraTodasLasNotas();
                         actualizaLista();
                     }
                 });
@@ -192,6 +206,12 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         AlertDialog confirma = dialogo.create();
         confirma.show();
     }
+
+    /**
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -214,21 +234,21 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         switch (requestCode) {
             case CREA_NOTA: {
                 Log.i(TAG, "Crea producto " + nota);
-                notaDbAdaptor.creaNota(nota);
+                objectsDbAdaptor.creaNota(nota);
 
                 cursorAdapter.notifyDataSetChanged();
                 actualizaLista();
                 break;
             }
             case MODIFICA_NOTA: {
-                Long id = extras.getLong(NotaDbAdaptor.COL_ID);
+                Long id = extras.getLong(ObjectsDbAdaptor.COL_ID);
                 Log.i(TAG, "Modifica producto " + id);
                 if (id == null) {
                     Log.e(TAG, getString(R.string.error_detalle));
                     finish();
                 }
 
-                notaDbAdaptor.actualizaNota(id, nota);
+                objectsDbAdaptor.actualizaNota(id, nota);
                 actualizaLista();
                 break;
             }
@@ -239,5 +259,29 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
     }
 
-}
+    public void checkClave() {
+        if (clave.equals(ObjectsDbAdaptor.NULLPASS) ) {
+                AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+                dialogo.setMessage(R.string.empty_key);
 
+                final EditText input = new EditText(this);
+                dialogo.setView(input);
+
+                dialogo.setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                clave= input.getText().toString();
+
+                                objectsDbAdaptor.creaPass(new Password(clave));
+                                Log.i(TAG, "Nueva passw " + objectsDbAdaptor.recuperaPassword());
+                            }
+
+                        });
+                AlertDialog confirma = dialogo.create();
+                confirma.show();
+            }
+
+        }
+    }

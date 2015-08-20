@@ -1,4 +1,4 @@
-package com.hefesto.bg.hefestonotes;
+package com.hefesto.bg.hefestonotes.auxclases;
 
 /**
  * Created by Borja on 14/08/2015.

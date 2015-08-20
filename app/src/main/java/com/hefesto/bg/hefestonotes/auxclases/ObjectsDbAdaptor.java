@@ -1,8 +1,9 @@
-package com.hefesto.bg.hefestonotes;
+package com.hefesto.bg.hefestonotes.auxclases;
 
 /**
  * Created by Borja on 11/08/2015.
  */
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,37 +12,42 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class NotaDbAdaptor {
+public class ObjectsDbAdaptor {
 
+    private static final String DATABASE_TABLE_NOTA = "notas";
     public static final String COL_TITULO = "titulo";
     public static final String COL_CONTENIDO = "contenido";
     public static final String COL_CATEGORIA = "etiquetas";
     public static final String COL_CIFRADO = "cifrado";
     public static final String COL_ID = "_id";
 
-    private static final String TAG = NotaDbAdaptor.class.getSimpleName();
+    public static final String NULLPASS = "NullPass";
+
+    private static final String DATABASE_TABLE_PASS = "password";
+    public static final String COL_CONTRASEÑA = "contraseña";
+
+    private static final String TAG = ObjectsDbAdaptor.class.getSimpleName();
     private DBHelper dbHelper;
     private SQLiteDatabase db;
 
-    private static final String DATABASE_NAME = "album_notas";
-    private static final String DATABASE_TABLE = "notas";
+    private static final String DATABASE_NAME = "Base_datos";
 
-    private static final String DATABASE_CREATE = "create table " + DATABASE_TABLE
+
+    private static final String DATABASE_CREATE_NOTAS = "create table if not exists  " + DATABASE_TABLE_NOTA
             + " (_id integer primary key autoincrement, "
             + COL_TITULO + " text not null, "
             + COL_CONTENIDO + " text, "
             + COL_CIFRADO + " integer,"
             + COL_CATEGORIA + " text"
             + ");";
-
+    private static final String DATABASE_CREATE_PASS = "create table if not exists  " + DATABASE_TABLE_PASS
+            + " (_id integer primary key autoincrement, "
+            + COL_CONTRASEÑA + " text"
+            + ");";
 
     private static final int DATABASE_VERSION = 1;
 
     private final Context mCtx;
-
-
-
-
 
     private static class DBHelper extends SQLiteOpenHelper {
 
@@ -52,7 +58,8 @@ public class NotaDbAdaptor {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.i(TAG, "Creando base de datos");
-            db.execSQL(DATABASE_CREATE);
+            db.execSQL(DATABASE_CREATE_PASS);
+            db.execSQL(DATABASE_CREATE_NOTAS);
 
         }
 
@@ -60,10 +67,12 @@ public class NotaDbAdaptor {
         public void onUpgrade(SQLiteDatabase db, int versionAnterior, int versionNueva) {
             Log.w(TAG, "Actualizando base de datos de la versiÃ³n " + versionAnterior + " a "
                     + versionNueva + ", lo que destruirÃ¡ todos los datos existentes");
-            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE_NOTA);
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE_PASS);
             onCreate(db); // en desarrollo, vuelvo a crear BD en vez de cambiar de versiÃ³n
         }
     }
+
     /**
      * Constructor - recibe el contexto de la base de datos que va a ser
      * abierta o creada. Abre la base de datos. Si no se puede abrir, intenta crear una nueva
@@ -73,7 +82,7 @@ public class NotaDbAdaptor {
      * @param ctx contexto con el que trabajar
      * @throws SQLException si la base de datos no estuviera ni abierta ni creada
      */
-    public NotaDbAdaptor (Context ctx) throws SQLException {
+    public ObjectsDbAdaptor(Context ctx) throws SQLException {
         this.mCtx = ctx;
         dbHelper = new DBHelper(mCtx);
         db = dbHelper.getWritableDatabase();
@@ -84,9 +93,38 @@ public class NotaDbAdaptor {
     }
 
     private int boolean2int(boolean b) {
-        return  b ? 0 : 1;
+        return b ? 0 : 1;
     }
 
+    public String recuperaPassword() {
+        Log.w(TAG, "onRecuperaPassword");
+        Cursor c = db.query(DATABASE_TABLE_PASS, new String[]{COL_CONTRASEÑA}, null, null, null, null, null);
+        if (c.moveToFirst()) {
+            Log.i(TAG, "saliendo de recuperaPassword1");
+            int indiceContraseña = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CONTRASEÑA);
+            return c.getString(indiceContraseña);
+        }
+        Log.i(TAG, "saliendo de recuperaPassword2");
+        return NULLPASS;
+    }
+
+
+    public long creaPass(Password password) {
+        ContentValues valoresIniciales = new ContentValues();
+        valoresIniciales.put(COL_CONTRASEÑA, password.getContraseña());
+        return db.insert(DATABASE_TABLE_PASS, null, valoresIniciales);
+    }
+
+    public boolean actualizaPass(Password pass) {
+        Log.i(TAG, "Actualiza pass");
+        ContentValues args = new ContentValues();
+        args.put(COL_CONTRASEÑA, pass.getContraseña());
+        return db.update(DATABASE_TABLE_PASS, args, COL_ID + "=" + 0, null) > 0;
+    }
+
+    public void borraPass() {
+        db.delete(DATABASE_TABLE_PASS, null, null);
+    }
 
 
     public long creaNota(Nota nota) {
@@ -96,34 +134,35 @@ public class NotaDbAdaptor {
         valoresIniciales.put(COL_CIFRADO, boolean2int(nota.isCifrado()));
         valoresIniciales.put(COL_CATEGORIA, nota.getCategoria());
 
-        return db.insert(DATABASE_TABLE, null, valoresIniciales);
+        return db.insert(DATABASE_TABLE_NOTA, null, valoresIniciales);
     }
-
 
 
     public boolean borraNota(long id) {
         Log.i(TAG, "borra nota id " + id);
-        return db.delete(DATABASE_TABLE, COL_ID + "=" + id, null) > 0;
+        return db.delete(DATABASE_TABLE_NOTA, COL_ID + "=" + id, null) > 0;
     }
 
 
-    public  String [] recuperaCategorias(){
-        Cursor c = db.query(DATABASE_TABLE, new String[] {COL_CATEGORIA}, null, null, null, null, null);
+    public String[] recuperaCategorias() {
+        Cursor c = db.query(DATABASE_TABLE_NOTA, new String[]{COL_CATEGORIA}, null, null, null, null, null);
         if (c == null) {
+            Log.i(TAG, "categorias vacias ");
             return new String[0];
         }
-        int indiceCategoria = c.getColumnIndexOrThrow(NotaDbAdaptor.COL_CATEGORIA);
+        int indiceCategoria = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CATEGORIA);
         c.moveToFirst();
-        String [] categorias =	new String [c.getCount()];
+        String[] categorias = new String[c.getCount()];
         for (int i = 0; i < c.getCount(); i++) {
             categorias[i] = c.getString(indiceCategoria);
             c.moveToNext();
         }
         return categorias;
     }
+
     public Cursor recuperaTodasLasNotas() {
 
-        return db.query(DATABASE_TABLE, new String[] {COL_ID, COL_TITULO,
+        return db.query(DATABASE_TABLE_NOTA, new String[]{COL_ID, COL_TITULO,
                 COL_CONTENIDO, COL_CIFRADO, COL_CATEGORIA}, null, null, null, null, null);
     }
 
@@ -131,7 +170,7 @@ public class NotaDbAdaptor {
 
         Cursor mCursor =
 
-                db.query(true, DATABASE_TABLE, new String[] {COL_ID,
+                db.query(true, DATABASE_TABLE_NOTA, new String[]{COL_ID,
                                 COL_TITULO, COL_CONTENIDO, COL_CIFRADO, COL_CATEGORIA}, COL_ID + "=" + id, null,
                         null, null, null, null);
         if (mCursor != null) {
@@ -142,8 +181,8 @@ public class NotaDbAdaptor {
     }
 
 
-    public void borraTodasLasNotas () {
-        db.delete(DATABASE_TABLE, null, null);
+    public void borraTodasLasNotas() {
+        db.delete(DATABASE_TABLE_NOTA, null, null);
     }
 
     public boolean actualizaNota(long id, Nota nota) {
@@ -153,7 +192,7 @@ public class NotaDbAdaptor {
         args.put(COL_CONTENIDO, nota.getContenido());
         args.put(COL_CIFRADO, boolean2int(nota.isCifrado()));
         args.put(COL_CATEGORIA, nota.getCategoria());
-        return db.update(DATABASE_TABLE, args, COL_ID + "=" + id, null) > 0;
+        return db.update(DATABASE_TABLE_NOTA, args, COL_ID + "=" + id, null) > 0;
     }
 
 
