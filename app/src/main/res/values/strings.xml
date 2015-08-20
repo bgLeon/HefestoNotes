@@ -27,5 +27,13 @@
     <string name="decirCifrado">Su nota se ha cifrado</string>
     <string name="decirDescifrado">Su nota se ha descifrado</string>
     <string name="confirm_exit">¿Salir sin guardar?</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="tituloContraseña">Contraseña</string>
+    <string name="rellena_contraseña">Escribe aqui tu contraseña</string>
+    <string name="titulo_pregunta">Tu Pregunta</string>
+    <string name="formula_preg">Formula tu pregunta</string>
+    <string name="respuesta">Respuesta</string>
+    <string name="formula_respuesta">Escribe aquí la respuesta a la pregunta anterior</string>
+    <string name="rellenar_todo">Debe rellenar todos los campos</string>
 
 </resources>

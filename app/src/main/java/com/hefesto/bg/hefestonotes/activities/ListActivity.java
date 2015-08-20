@@ -29,6 +29,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
     public static final String REQUEST_CODE = "requestCode";
     public static final int CREA_NOTA = 0;
     public static final int MODIFICA_NOTA = 1;
+    public static final int CREA_SEGU = 2;
 
 
     ListView lista;
@@ -50,7 +51,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         setContentView(R.layout.activity_list);
         objectsDbAdaptor = new ObjectsDbAdaptor(this);
         notasCursor = objectsDbAdaptor.recuperaTodasLasNotas();
-        clave=objectsDbAdaptor.recuperaPassword();
+        clave = objectsDbAdaptor.recuperaPassword();
         indiceTitulo = notasCursor
                 .getColumnIndexOrThrow(ObjectsDbAdaptor.COL_TITULO);
         indiceContenido = notasCursor
@@ -75,7 +76,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         TextView emptyText = (TextView) findViewById(android.R.id.empty);
         lista.setEmptyView(emptyText);
 
-        if (clave.equals(ObjectsDbAdaptor.NULLPASS))checkClave();
+        if (clave.equals(ObjectsDbAdaptor.NULLPASS)) checkClave();
 
     }
 
@@ -177,7 +178,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         extras.putLong(ObjectsDbAdaptor.COL_ID, id);
         extras.putSerializable(Nota.NOTA, nota);
         extras.putInt(REQUEST_CODE, MODIFICA_NOTA);
-        extras.putString("key",clave);
+        extras.putString("key", clave);
         intent.putExtras(extras);
         startActivityForResult(intent, MODIFICA_NOTA);
     }
@@ -229,10 +230,9 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         for (String s : extras.keySet()) {
             Log.i(TAG, "extra " + s);
         }
-        Nota nota = (Nota) extras.getSerializable(Nota.NOTA);
-
         switch (requestCode) {
             case CREA_NOTA: {
+                Nota nota = (Nota) extras.getSerializable(Nota.NOTA);
                 Log.i(TAG, "Crea producto " + nota);
                 objectsDbAdaptor.creaNota(nota);
 
@@ -241,6 +241,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 break;
             }
             case MODIFICA_NOTA: {
+                Nota nota = (Nota) extras.getSerializable(Nota.NOTA);
                 Long id = extras.getLong(ObjectsDbAdaptor.COL_ID);
                 Log.i(TAG, "Modifica producto " + id);
                 if (id == null) {
@@ -252,6 +253,11 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 actualizaLista();
                 break;
             }
+            case CREA_SEGU: {
+                Seguridad seguridad = (Seguridad) extras.getSerializable(Seguridad.SEGURIDAD);
+                objectsDbAdaptor.creaSeguridad(seguridad);
+                break;
+            }
             default: {
                 Log.e(TAG, "Opción no conocida " + requestCode);
             }
@@ -259,29 +265,29 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
     }
 
-    public void checkClave() {
-        if (clave.equals(ObjectsDbAdaptor.NULLPASS) ) {
-                AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
-                dialogo.setMessage(R.string.empty_key);
+    private void checkClave() {
+        if (clave.equals(ObjectsDbAdaptor.NULLPASS)) {
+            AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+            dialogo.setMessage(R.string.empty_key);
+            dialogo.setPositiveButton(android.R.string.ok,
+                    new DialogInterface.OnClickListener() {
 
-                final EditText input = new EditText(this);
-                dialogo.setView(input);
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            creaClaves();
+                        }
 
-                dialogo.setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                clave= input.getText().toString();
-
-                                objectsDbAdaptor.creaPass(new Seguridad(clave));
-                                Log.i(TAG, "Nueva passw " + objectsDbAdaptor.recuperaPassword());
-                            }
-
-                        });
-                AlertDialog confirma = dialogo.create();
-                confirma.show();
-            }
-
+                    });
+            AlertDialog confirma = dialogo.create();
+            confirma.show();
         }
+
     }
+    private void creaClaves() {
+        Intent miIntent = new Intent(this, LoginActivity.class);
+        Bundle extras = new Bundle();
+        extras.putInt(REQUEST_CODE, CREA_SEGU);
+        miIntent.putExtras(extras);
+        startActivityForResult(miIntent, CREA_NOTA);
+    }
+}

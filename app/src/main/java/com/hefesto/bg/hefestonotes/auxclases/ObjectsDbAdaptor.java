@@ -25,6 +25,8 @@ public class ObjectsDbAdaptor {
 
     private static final String DATABASE_TABLE_PASS = "password";
     public static final String COL_CONTRASEÑA = "contraseña";
+    public static final String COL_PREGUNTA = "pregunta";
+    public static final String COL_RESPUESTA = "respuesta";
 
     private static final String TAG = ObjectsDbAdaptor.class.getSimpleName();
     private DBHelper dbHelper;
@@ -42,7 +44,9 @@ public class ObjectsDbAdaptor {
             + ");";
     private static final String DATABASE_CREATE_PASS = "create table if not exists  " + DATABASE_TABLE_PASS
             + " (_id integer primary key autoincrement, "
-            + COL_CONTRASEÑA + " text"
+            + COL_CONTRASEÑA + " text not null,"
+            + COL_PREGUNTA + "text not null,"
+            + COL_RESPUESTA + "text not null"
             + ");";
 
     private static final int DATABASE_VERSION = 1;
@@ -109,9 +113,11 @@ public class ObjectsDbAdaptor {
     }
 
 
-    public long creaPass(Seguridad seguridad) {
+    public long creaSeguridad(Seguridad parametros) {
         ContentValues valoresIniciales = new ContentValues();
-        valoresIniciales.put(COL_CONTRASEÑA, seguridad.getContraseña());
+        valoresIniciales.put(COL_CONTRASEÑA, parametros.getContraseña());
+        valoresIniciales.put(COL_PREGUNTA, parametros.getPregunta());
+        valoresIniciales.put(COL_RESPUESTA, parametros.getRespuesta());
         return db.insert(DATABASE_TABLE_PASS, null, valoresIniciales);
     }
 
@@ -119,10 +125,23 @@ public class ObjectsDbAdaptor {
         Log.i(TAG, "Actualiza pass");
         ContentValues args = new ContentValues();
         args.put(COL_CONTRASEÑA, pass.getContraseña());
-        return db.update(DATABASE_TABLE_PASS, args, COL_ID + "=" + 0, null) > 0;
+        Cursor c = db.query(DATABASE_TABLE_NOTA, new String[]{COL_CATEGORIA}, null, null, null, null, null);
+        int indiceContraseña = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CATEGORIA);
+        return db.update(DATABASE_TABLE_PASS, args, COL_ID + "=" + indiceContraseña, null) > 0;
     }
-
-    public void borraPass() {
+    public String[] recuperaSeguridad() {
+        Cursor c = db.query(DATABASE_TABLE_PASS, new String[]{COL_PREGUNTA, COL_RESPUESTA}, null, null, null, null, null);
+        int indicePregunta = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_PREGUNTA);
+        int indiceRespuesta = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_RESPUESTA);
+        Log.w(TAG, "indicePregunta: "+ indicePregunta);
+        Log.w(TAG, "indiceRespuesta: " + indiceRespuesta);
+        String[] PregResp = new String[2];
+        PregResp[0]=c.getString(indicePregunta);
+        PregResp[1]=c.getString(indiceRespuesta);
+        Log.i(TAG,"Pregunta: "+ PregResp[0]+ " || Respuesta: " + PregResp[1]);
+        return PregResp;
+    }
+    public void borraSeguridad() {
         db.delete(DATABASE_TABLE_PASS, null, null);
     }
 
