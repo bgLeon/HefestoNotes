@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.hefesto.bg.hefestonotes.auxclases.Nota;
 import com.hefesto.bg.hefestonotes.auxclases.ObjectsDbAdaptor;
 import com.hefesto.bg.hefestonotes.R;
-import com.hefesto.bg.hefestonotes.auxclases.Password;
+import com.hefesto.bg.hefestonotes.auxclases.Seguridad;
 
 
 public class ListActivity extends AppCompatActivity implements OnItemClickListener {
@@ -274,7 +274,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                             public void onClick(DialogInterface dialog, int which) {
                                 clave= input.getText().toString();
 
-                                objectsDbAdaptor.creaPass(new Password(clave));
+                                objectsDbAdaptor.creaPass(new Seguridad(clave));
                                 Log.i(TAG, "Nueva passw " + objectsDbAdaptor.recuperaPassword());
                             }
 

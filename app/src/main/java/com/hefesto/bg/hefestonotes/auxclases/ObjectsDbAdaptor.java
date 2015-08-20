@@ -109,13 +109,13 @@ public class ObjectsDbAdaptor {
     }
 
 
-    public long creaPass(Password password) {
+    public long creaPass(Seguridad seguridad) {
         ContentValues valoresIniciales = new ContentValues();
-        valoresIniciales.put(COL_CONTRASEÑA, password.getContraseña());
+        valoresIniciales.put(COL_CONTRASEÑA, seguridad.getContraseña());
         return db.insert(DATABASE_TABLE_PASS, null, valoresIniciales);
     }
 
-    public boolean actualizaPass(Password pass) {
+    public boolean actualizaPass(Seguridad pass) {
         Log.i(TAG, "Actualiza pass");
         ContentValues args = new ContentValues();
         args.put(COL_CONTRASEÑA, pass.getContraseña());
