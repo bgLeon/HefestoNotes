@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,12 +75,28 @@ public class LoginActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_help) {
+            AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+            dialogo.setTitle(R.string.help);
+            dialogo.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_help));
+            dialogo.setMessage(R.string.explicacion_login);
+            dialogo.setNeutralButton(android.R.string.ok,
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+
+                    });
+            AlertDialog confirma = dialogo.create();
+            confirma.show();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
 
     private class MiButtonGuardarOnClickListener implements
             View.OnClickListener {
@@ -91,7 +108,6 @@ public class LoginActivity extends AppCompatActivity {
             String respuesta = editRespuesta.getText().toString();
 
             if (!password.isEmpty() && !pregunta.isEmpty() && !respuesta.isEmpty()) {
-                Log.w(TAG,"Password: " + password);
                 Intent miIntent = new Intent();
                 Bundle extras = new Bundle();
                 Seguridad parametros = new Seguridad(password, pregunta, respuesta);
@@ -105,6 +121,16 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            decirRellenar();
+            return false;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 
     private void decirRellenar() {
         Toast.makeText(this, R.string.rellenar_todo, Toast.LENGTH_LONG).show();
@@ -116,15 +142,14 @@ public class LoginActivity extends AppCompatActivity {
     private void mensajeExplicativo(){
         AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
         dialogo.setMessage(R.string.empty_key);
-        /*dialogo.setPositiveButton(android.R.string.ok,
+        dialogo.setPositiveButton(android.R.string.ok,
                 new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        creaClaves();
                     }
 
-                });*/
+                });
         AlertDialog confirma = dialogo.create();
         confirma.show();
     }

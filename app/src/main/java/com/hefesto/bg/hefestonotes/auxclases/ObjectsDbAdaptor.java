@@ -121,24 +121,25 @@ public class ObjectsDbAdaptor {
         return db.insert(DATABASE_TABLE_PASS, null, valoresIniciales);
     }
 
-    public boolean actualizaPass(Seguridad pass) {
+    public boolean actualizaPass(String pass) {
         Log.i(TAG, "Actualiza pass");
         ContentValues args = new ContentValues();
-        args.put(COL_CONTRASEÑA, pass.getContraseña());
-        Cursor c = db.query(DATABASE_TABLE_NOTA, new String[]{COL_CATEGORIA}, null, null, null, null, null);
-        int indiceContraseña = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_CATEGORIA);
-        return db.update(DATABASE_TABLE_PASS, args, COL_ID + "=" + indiceContraseña, null) > 0;
+        Cursor c = db.query(DATABASE_TABLE_PASS, new String[]{COL_ID}, null, null, null, null, null);
+        c.moveToFirst();
+        int indiceID=c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_ID);
+        int id=c.getInt(indiceID);
+        args.put(COL_CONTRASEÑA, pass);
+        return db.update(DATABASE_TABLE_PASS, args, COL_ID + "=" + id, null) > 0;
     }
     public String[] recuperaSeguridad() {
+        Log.w(TAG, "onRecuperaSeguridad");
         Cursor c = db.query(DATABASE_TABLE_PASS, new String[]{COL_PREGUNTA, COL_RESPUESTA}, null, null, null, null, null);
+        c.moveToFirst();
         int indicePregunta = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_PREGUNTA);
         int indiceRespuesta = c.getColumnIndexOrThrow(ObjectsDbAdaptor.COL_RESPUESTA);
-        Log.w(TAG, "indicePregunta: "+ indicePregunta);
-        Log.w(TAG, "indiceRespuesta: " + indiceRespuesta);
         String[] PregResp = new String[2];
         PregResp[0]=c.getString(indicePregunta);
         PregResp[1]=c.getString(indiceRespuesta);
-        Log.i(TAG,"Pregunta: "+ PregResp[0]+ " || Respuesta: " + PregResp[1]);
         return PregResp;
     }
     public void borraSeguridad() {

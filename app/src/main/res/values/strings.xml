@@ -37,5 +37,12 @@
     <string name="rellenar_todo">Debe rellenar todos los campos</string>
     <string name="Seg_Guardada">Todos los campos se han guardado</string>
     <string name="titulo_vacio">La nota debe tener un título</string>
+    <string name="change_pass">Modificar Contraseña</string>
+    <string name="responda_pregunta">Para modificar la contraseña, debe dar la respuesta correcta a la pregunta que guardó:</string>
+    <string name="dialogo_pass_cambiada">Clave modificada correctamente</string>
+    <string name="dialogo_R_incorrecta">Lo siento, esa no es la respuesta que dió la otra vez</string>
+    <string name="intr_nueva_pass">Introduzca ahora su nueva contraseña:</string>
+    <string name="help">Ayuda</string>
+    <string name="explicacion_login">La contraseña que escriba será la que se use para cifrar las notas. La pregunta y la respuesta, una vez guardadas, no se pueden cambiar. Si quiere cambiar la contraseña, se le formulará la pregunta que escriba y se le pedirá que de la respuesta dada en el último campo.</string>
 
 </resources>

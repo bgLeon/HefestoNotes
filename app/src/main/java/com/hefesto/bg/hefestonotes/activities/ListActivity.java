@@ -118,6 +118,10 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 return true;
 
             }
+            case R.id.ModificarContraseña: {
+                modificarContraseña();
+                return true;
+            }
 
             default: {
                 Log.w(TAG, "Opción desconocida " + item.getItemId());
@@ -256,7 +260,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
             case CREA_SEGU: {
                 Seguridad seguridad = (Seguridad) extras.getSerializable(Seguridad.SEGURIDAD);
                 objectsDbAdaptor.creaSeguridad(seguridad);
-                clave=seguridad.getContraseña();
+                clave = seguridad.getContraseña();
                 break;
             }
             default: {
@@ -277,4 +281,88 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
 
     }
 
+    private void modificarContraseña() {
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+        dialogo.setMessage(R.string.responda_pregunta);
+        dialogo.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        preguntarUs();
+                    }
+
+                });
+        AlertDialog confirma = dialogo.create();
+        confirma.show();
+
+
+    }
+
+    private void preguntarUs() {
+        String[] segu = objectsDbAdaptor.recuperaSeguridad();
+        String pregunta = segu[0];
+        final String respuesta = segu[1];
+        final EditText input = new EditText(this);
+        AlertDialog.Builder dialogo2 = new AlertDialog.Builder(this);
+        dialogo2.setMessage(pregunta);
+        dialogo2.setView(input);
+        dialogo2.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String respIntr = input.getText().toString();
+                        if (respIntr.equals(respuesta)) {
+                            introducirNuevaClave();
+                        } else {
+                            dialogoRespuestaIncorrecta();
+                        }
+                    }
+
+                });
+        dialogo2.setNegativeButton(android.R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+
+                });
+        AlertDialog confirmacion = dialogo2.create();
+        confirmacion.show();
+    }
+
+    private void introducirNuevaClave() {
+        final EditText input = new EditText(this);
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+        dialogo.setMessage(R.string.intr_nueva_pass);
+        dialogo.setView(input);
+        dialogo.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String newPass = input.getText().toString();
+                        objectsDbAdaptor.actualizaPass(newPass);
+                        dialogoClaveCambiada();
+                        clave=newPass;
+                    }
+
+                });
+        AlertDialog confirma = dialogo.create();
+        confirma.show();
+
+
+    }
+
+    private void dialogoRespuestaIncorrecta() {
+        Toast.makeText(this, getString(R.string.dialogo_R_incorrecta),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void dialogoClaveCambiada() {
+        Toast.makeText(this, getString(R.string.dialogo_pass_cambiada),
+                Toast.LENGTH_SHORT).show();
+    }
 }
