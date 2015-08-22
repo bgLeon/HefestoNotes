@@ -114,7 +114,6 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
             }
             case R.id.BorrarLista: {
                 borrarLista();
-                actualizaLista();
                 return true;
 
             }
@@ -128,6 +127,33 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                 return false;
             }
         }
+    }
+
+    private void borrarLista() {
+        android.app.AlertDialog.Builder dialogo = new android.app.AlertDialog.Builder(this);
+        dialogo.setTitle(R.string.atencion);
+        dialogo.setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
+        dialogo.setMessage(R.string.confirm_borrado_album);
+
+        dialogo.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        objectsDbAdaptor.borraTodasLasNotas();
+                        actualizaLista();
+
+                    }
+                });
+        dialogo.setNegativeButton(android.R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+        android.app.AlertDialog confirma = dialogo.create();
+        confirma.show();
     }
 
     @Override
@@ -187,31 +213,6 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         startActivityForResult(intent, MODIFICA_NOTA);
     }
 
-    private void borrarLista() {
-        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
-        dialogo.setMessage(R.string.dialogo_borrar_lista);
-        dialogo.setPositiveButton(android.R.string.ok,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        objectsDbAdaptor.borraTodasLasNotas();
-                        actualizaLista();
-                    }
-                });
-        dialogo.setNegativeButton(android.R.string.cancel,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.w(TAG, "Cancelado borrar lista");
-
-                    }
-                });
-        AlertDialog confirma = dialogo.create();
-        confirma.show();
-    }
-
     /**
      * @param requestCode
      * @param resultCode
@@ -230,16 +231,16 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                     Toast.LENGTH_SHORT).show();
             return;
         }
-
         for (String s : extras.keySet()) {
             Log.i(TAG, "extra " + s);
         }
+        boolean delete = extras.getBoolean("Delete");
         switch (requestCode) {
             case CREA_NOTA: {
+                if (delete) break;
                 Nota nota = (Nota) extras.getSerializable(Nota.NOTA);
                 Log.i(TAG, "Crea producto " + nota);
                 objectsDbAdaptor.creaNota(nota);
-
                 cursorAdapter.notifyDataSetChanged();
                 actualizaLista();
                 break;
@@ -252,10 +253,16 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                     Log.e(TAG, getString(R.string.error_detalle));
                     finish();
                 }
+                if (delete) {
+                    objectsDbAdaptor.borraNota(id);
+                    actualizaLista();
+                    break;
+                } else {
+                    objectsDbAdaptor.actualizaNota(id, nota);
+                    actualizaLista();
+                    break;
+                }
 
-                objectsDbAdaptor.actualizaNota(id, nota);
-                actualizaLista();
-                break;
             }
             case CREA_SEGU: {
                 Seguridad seguridad = (Seguridad) extras.getSerializable(Seguridad.SEGURIDAD);
@@ -346,7 +353,7 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
                         String newPass = input.getText().toString();
                         objectsDbAdaptor.actualizaPass(newPass);
                         dialogoClaveCambiada();
-                        clave=newPass;
+                        clave = newPass;
                     }
 
                 });
@@ -365,4 +372,5 @@ public class ListActivity extends AppCompatActivity implements OnItemClickListen
         Toast.makeText(this, getString(R.string.dialogo_pass_cambiada),
                 Toast.LENGTH_SHORT).show();
     }
+
 }

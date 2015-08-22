@@ -14,7 +14,6 @@
     <string name="ListaVacia">Aun no ha guardado ninguna nota</string>
     <string name="a_adir">Añadir</string>
     <string name="borrar_lista">Borrar todas las notas</string>
-    <string name="dialogo_borrar_lista">¿Está seguro de que quiere borrar todos los datos?</string>
     <string name="msg_info">Lista de Notas, aquí puede ver todas las notas que tiene guardadas </string>
     <string name="info">Información</string>
     <string name="nota_guardada">Su nota se ha guardado</string>
@@ -44,5 +43,11 @@
     <string name="intr_nueva_pass">Introduzca ahora su nueva contraseña:</string>
     <string name="help">Ayuda</string>
     <string name="explicacion_login">La contraseña que escriba será la que se use para cifrar las notas. La pregunta y la respuesta, una vez guardadas, no se pueden cambiar. Si quiere cambiar la contraseña, se le formulará la pregunta que escriba y se le pedirá que de la respuesta dada en el último campo.</string>
+    <string name="delete">Borrar</string>
+    <string name="seg_guardada">Sus parametros se han guardado correctamente</string>
+    <string name="conf_borrar_nota">¿Seguro que quiere borrar la nota?</string>
+    <string name="atencion">Atención</string>
+    <string name="nota_eliminada">Su nota ha sido eliminada</string>
+    <string name="confirm_borrado_album">Todas su notas se borrarán, ¿Está seguro?</string>
 
 </resources>

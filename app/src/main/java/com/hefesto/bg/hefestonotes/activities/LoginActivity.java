@@ -137,7 +137,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void decirGuardado() {
-        Toast.makeText(this, R.string.nota_guardada, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.seg_guardada, Toast.LENGTH_LONG).show();
     }
     private void mensajeExplicativo(){
         AlertDialog.Builder dialogo = new AlertDialog.Builder(this);

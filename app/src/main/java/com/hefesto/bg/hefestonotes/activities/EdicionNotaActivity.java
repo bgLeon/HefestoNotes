@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -36,7 +38,8 @@ public class EdicionNotaActivity extends AppCompatActivity {
     private long id;
     private String clave;
     private boolean isCifrado;
-    private boolean isSave;
+    private boolean delete;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +47,6 @@ public class EdicionNotaActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_edicion_nota);
         editCategoria = (AutoCompleteTextView) findViewById(R.id.editCategoria);
-        isSave = false;
         objectsDbAdaptor = new ObjectsDbAdaptor(this);
         adaptadorAutocomplete = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -52,6 +54,7 @@ public class EdicionNotaActivity extends AppCompatActivity {
         editCategoria.setAdapter(adaptadorAutocomplete);
         editTitulo = (EditText) findViewById(R.id.editTitulo);
         editContenido = (EditText) findViewById(R.id.editContenido);
+        delete=false;
 
         buttonGuardar = (Button) findViewById(R.id.saveButton);
         buttonGuardar.setOnClickListener(new MiButtonGuardarOnClickListener());
@@ -93,6 +96,11 @@ public class EdicionNotaActivity extends AppCompatActivity {
             }
             Log.d(TAG, "Edito " + nota);
         }
+    }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_edicion_nota, menu);
+        return true;
     }
 
     @Override
@@ -151,74 +159,22 @@ public class EdicionNotaActivity extends AppCompatActivity {
         Log.d(TAG, "onStop");
     }
 
-    /**
-     * Elimina las categorias repetidas y las vacias para el autocomplete
-     *
-     * @param parametro Las categorias
-     * @return Las categorias sin repetir
-     */
-    private String[] eliminaRepetidos(String[] parametro) {
-        int n = parametro.length;
-        if (n == 0 || n == 1)
-            return parametro;
-        String empty = "";
-        Log.d(TAG, "el primer for" + n);
-        for (int i = 0; i < parametro.length; i++) {
-            if (parametro[i].equals(empty)) {
-                Log.i(TAG, "resta");
-                n--;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()) {
+            case R.id.BorrarNota: {
+                confirmarBorrado();
+                return true;
             }
-            for (int j = i + 1; j < parametro.length; j++) {
-                if (parametro[i] != null && parametro[j] != null
-                        && !parametro[i].equals(empty)
-                        && !parametro[j].equals(empty)) {
-                    if (parametro[i].equals(parametro[j])) {
-                        Log.d(TAG, "Parametro i " + parametro[i]);
-                        Log.d(TAG, "Parametro j " + parametro[j]);
-                        n--;
-                        for (int k = i - 1; k >= 0; k--) {
-                            if (parametro[k].equals(parametro[j])) {
-                                Log.i(TAG, "suma");
-                                n++;
-                            }
-                        }
-                    }
-                }
+            default: {
+                Log.w(TAG, "Opción desconocida " + item.getItemId());
+                return false;
             }
         }
-        Log.d(TAG, "Pasado el primer for " + n);
-        String[] param = new String[n];
-        param[0] = parametro[0];
-        int l = 1;
-        for (int i = 0; i < parametro.length; i++) {
-            int z = 0;
-            if (parametro[i] != null && !parametro[i].equals(empty)) {
-                for (int j = 0; j < param.length; j++) {
-                    if (param[j] != null) {
-
-                        if (parametro[i].equals(param[j])) {
-                            z++;
-                        }
-                    }
-                    if (j == param.length - 1) {
-                        if (z == 0) {
-
-                            Log.d(TAG, "Rellenando " + l);
-                            Log.d(TAG, "Rellenando " + i);
-                            Log.d(TAG, "Rellenando " + parametro[i]);
-                            Log.i(TAG, "cambio");
-                            param[l] = parametro[i];
-                            l++;
-                        }
-                    }
-                }
-            }
-        }
-
-        Log.d(TAG, "Terminando " + param.length);
-        return param;
     }
-
     private class MiButtonGuardarOnClickListener implements
             View.OnClickListener {
         @Override
@@ -227,25 +183,64 @@ public class EdicionNotaActivity extends AppCompatActivity {
             String titulo = editTitulo.getText().toString();
             if (titulo.isEmpty()) {
                 decirRellenar();
-                return;
             }
-            Intent miIntent = new Intent();
-            Bundle extras = new Bundle();
-            extras.putLong(ObjectsDbAdaptor.COL_ID, id);
-            String contenido = editContenido.getText().toString();
-            String categoria = editCategoria.getText().toString();
-            Nota nt = new Nota(titulo, contenido, categoria, isCifrado);
-            extras.putSerializable(Nota.NOTA, nt);
-            miIntent.putExtras(extras);
-            setResult(RESULT_OK, miIntent);
-            decirGuardado();
-            isSave = true;
-            finish();
+            else {
+                edicionCompletada();
+            }
+
         }
+    }
+    private void edicionCompletada(){
+        Intent miIntent = new Intent();
+        Bundle extras = new Bundle();
+        extras.putLong(ObjectsDbAdaptor.COL_ID, id);
+        String titulo = editTitulo.getText().toString();
+        String contenido = editContenido.getText().toString();
+        String categoria = editCategoria.getText().toString();
+        Nota nt = new Nota(titulo, contenido, categoria, isCifrado);
+        extras.putSerializable(Nota.NOTA, nt);
+        extras.putBoolean("Delete",delete);
+        miIntent.putExtras(extras);
+        setResult(RESULT_OK, miIntent);
+        if (delete) decirBorrado();
+        else decirGuardado();
+        finish();
+
     }
     private void decirRellenar(){
         Toast.makeText(this, R.string.titulo_vacio, Toast.LENGTH_LONG).show();
     }
+    private void decirBorrado(){
+        Toast.makeText(this, R.string.nota_eliminada, Toast.LENGTH_LONG).show();
+
+    }
+    private void confirmarBorrado(){
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+        dialogo.setTitle(R.string.atencion);
+        dialogo.setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
+        dialogo.setMessage(R.string.conf_borrar_nota);
+        dialogo.setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        delete=true;
+                        edicionCompletada();
+
+                    }
+                });
+        dialogo.setNegativeButton(android.R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+        AlertDialog confirma = dialogo.create();
+        confirma.show();
+    }
+
+
     private void decirGuardado() {
         Toast.makeText(this, R.string.nota_guardada, Toast.LENGTH_LONG).show();
     }
@@ -433,9 +428,72 @@ public class EdicionNotaActivity extends AppCompatActivity {
 
     }
 
-    public String getClave() {
-        if (clave == null) return "Nullkey";
-        return clave;
+    /**
+     * Elimina las categorias repetidas y las vacias para el autocomplete
+     *
+     * @param parametro Las categorias
+     * @return Las categorias sin repetir
+     */
+    private String[] eliminaRepetidos(String[] parametro) {
+        int n = parametro.length;
+        if (n == 0 || n == 1)
+            return parametro;
+        String empty = "";
+        Log.d(TAG, "el primer for" + n);
+        for (int i = 0; i < parametro.length; i++) {
+            if (parametro[i].equals(empty)) {
+                Log.i(TAG, "resta");
+                n--;
+            }
+            for (int j = i + 1; j < parametro.length; j++) {
+                if (parametro[i] != null && parametro[j] != null
+                        && !parametro[i].equals(empty)
+                        && !parametro[j].equals(empty)) {
+                    if (parametro[i].equals(parametro[j])) {
+                        Log.d(TAG, "Parametro i " + parametro[i]);
+                        Log.d(TAG, "Parametro j " + parametro[j]);
+                        n--;
+                        for (int k = i - 1; k >= 0; k--) {
+                            if (parametro[k].equals(parametro[j])) {
+                                Log.i(TAG, "suma");
+                                n++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "Pasado el primer for " + n);
+        String[] param = new String[n];
+        param[0] = parametro[0];
+        int l = 1;
+        for (int i = 0; i < parametro.length; i++) {
+            int z = 0;
+            if (parametro[i] != null && !parametro[i].equals(empty)) {
+                for (int j = 0; j < param.length; j++) {
+                    if (param[j] != null) {
+
+                        if (parametro[i].equals(param[j])) {
+                            z++;
+                        }
+                    }
+                    if (j == param.length - 1) {
+                        if (z == 0) {
+
+                            Log.d(TAG, "Rellenando " + l);
+                            Log.d(TAG, "Rellenando " + i);
+                            Log.d(TAG, "Rellenando " + parametro[i]);
+                            Log.i(TAG, "cambio");
+                            param[l] = parametro[i];
+                            l++;
+                        }
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "Terminando " + param.length);
+        return param;
     }
 }
 
